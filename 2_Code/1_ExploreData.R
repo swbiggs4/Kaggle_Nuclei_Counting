@@ -24,12 +24,19 @@ li.files<- list.files(path = "1_Data/stage1_train" ,pattern = ".png", recursive 
 
 # Make a dataframe that does not contain the masks 
 df.trainingData_meta<- data.frame(Path = li.files) %>% filter(!grepl("masks",Path)) 
-
+df.trainingData_meta$Path<- 
 # Add full path
 df.trainingData_meta$LoadPath<- paste0("1_Data/stage1_train/",df.trainingData_meta$Path)
 
 # Load all the pngs - 3.1GB
 li.images<- lapply(df.trainingData_meta$LoadPath,readPNG)
+
+# Convert to char
+df.trainingData_meta$Path<- as.character(df.trainingData_meta$Path)
+
+# ID only
+df.trainingData_meta$ID<- unlist(strsplit(df.trainingData_meta$Path,".png"))
+
 
 
 # Explore -----------------------------------------------------------------
@@ -38,6 +45,9 @@ li.images<- lapply(df.trainingData_meta$LoadPath,readPNG)
 # Get various information
 df.trainingData_meta$Dims<- rapply(li.images,dim, how = "list") # dimensions - some may be RGBA 
 df.trainingData_meta$Intensity<- sapply(li.images,sum) # sum for intensity
+
+# Convert to char
+df.trainingData_meta$Dims<- as.character(df.trainingData_meta$Dims)
 
 # Look at a few examples - overplots
 grid::grid.raster(li.images[[1]]) # dark
@@ -71,7 +81,7 @@ df.testData_meta<- data.frame(Path = li.files_test) %>% filter(!grepl("masks",Pa
 # Add full path
 df.testData_meta$LoadPath<- paste0("1_Data/stage1_test/",df.testData_meta$Path)
 
-# Load all the pngs - 3.1GB
+# Load all the pngs 
 li.images_test<- lapply(df.testData_meta$LoadPath,readPNG)
 
 # Get various information
@@ -111,11 +121,19 @@ grid::grid.raster(li.images_test[[57]])
 # Bin data on intensity category from training - only entries in first two bins
 df.testData_meta$IntensityBin_Training <- cut(df.testData_meta$Intensity, breaks = bins, labels = seq(1,length(bins)-1))
 
-table(df.testData_meta$IntensityBin) # train multiple models based on intensities - remove large intensities from training data?
+table(df.testData_meta$IntensityBin_Training) # train multiple models based on intensities - remove large intensities from training data?
 
 # rebin training data using test bins?
 
 # Look at a few examples - overplots
 grid::grid.raster(li.images_test[[1]]) # dark
 grid::grid.raster(li.images_test[[6]]) # light
+
+
+# Save dataframe ----------------------------------------------------------
+
+
+
+
+write.csv(df.trainingData_meta,"1_Data/Training_MetaData.csv")
 

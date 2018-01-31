@@ -24,7 +24,7 @@ li.files<- list.files(path = "1_Data/stage1_train" ,pattern = ".png", recursive 
 
 # Make a dataframe that does not contain the masks 
 df.trainingData_meta<- data.frame(Path = li.files) %>% filter(!grepl("masks",Path)) 
-df.trainingData_meta$Path<- 
+
 # Add full path
 df.trainingData_meta$LoadPath<- paste0("1_Data/stage1_train/",df.trainingData_meta$Path)
 
